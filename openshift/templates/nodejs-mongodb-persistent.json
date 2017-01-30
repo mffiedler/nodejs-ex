@@ -2,17 +2,17 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "nodejs-mongodb-example",
+    "name": "nodejs-mongo-persistent",
     "annotations": {
-      "openshift.io/display-name": "Node.js + MongoDB (Ephemeral)",
-      "description": "An example Node.js application with a MongoDB database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/nodejs-ex/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
+      "openshift.io/display-name": "Node.js + MongoDB (Persistent)",
+      "description": "An example Node.js application with a MongoDB database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/nodejs-ex/blob/master/README.md.",
       "tags": "quickstart,nodejs",
       "iconClass": "icon-nodejs"
     }
   },
   "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshift/nodejs-ex/blob/master/README.md.",
   "labels": {
-    "template": "nodejs-mongodb-example"
+    "template": "nodejs-mongo-persistent"
   },
   "objects": [
     {
@@ -100,7 +100,7 @@
               "namespace": "${NAMESPACE}",
               "name": "nodejs:4"
             },
-            "env": [
+            "env":  [
               {
                 "name": "NPM_MIRROR",
                 "value": "${NPM_MIRROR}"
@@ -158,7 +158,7 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "nodejs-mongodb-example"
+                "nodejs-mongo-persistent"
               ],
               "from": {
                 "kind": "ImageStreamTag",
@@ -184,7 +184,7 @@
           "spec": {
             "containers": [
               {
-                "name": "nodejs-mongodb-example",
+                "name": "nodejs-mongo-persistent",
                 "image": " ",
                 "ports": [
                   {
@@ -251,6 +251,23 @@
                 }
               }
             ]
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_CAPACITY}"
           }
         }
       }
@@ -398,8 +415,8 @@
             "volumes": [
               {
                 "name": "${DATABASE_SERVICE_NAME}-data",
-                "emptyDir": {
-                  "medium": ""
+                "persistentVolumeClaim": {
+                  "claimName": "${DATABASE_SERVICE_NAME}"
                 }
               }
             ]
@@ -414,7 +431,7 @@
       "displayName": "Name",
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
-      "value": "nodejs-mongodb-example"
+      "value": "nodejs-mongo-persistent"
     },
     {
       "name": "NAMESPACE",
@@ -436,6 +453,13 @@
       "description": "Maximum amount of memory the MongoDB container can use.",
       "required": true,
       "value": "512Mi"
+    },
+    {
+      "name": "VOLUME_CAPACITY",
+      "displayName": "Volume Capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi",
+      "value": "1Gi",
+      "required": true
     },
     {
       "name": "SOURCE_REPOSITORY_URL",
